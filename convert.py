@@ -5,12 +5,14 @@ class Config:
     MAX_SIZE = 1048576  # Max Size for SFPro Icons
     SAVE_HEADER = True  # Save a C-Style header
     HEADER_NAME = 'icon_map.h'  # Header name
-    CREATE_VECTOR = False  # debugging purposes - create a list of every single macro.
+    CREATE_VECTOR = True  # debugging purposes - create a list of every single macro.
 
 from fontTools.ttLib import TTFont
 from datetime import datetime as dt
 
-OUT = ""
+OUT = "#pragma once\n"
+if Config.CREATE_VECTOR:
+    OUT += f'#include <vector>\n\n'
 NAMES = []
 
 def oprint(s):
@@ -69,6 +71,15 @@ months = {
     12: 'December',
 }
 
+def get_c_style_str(bytes):
+    # e.g. bytes=0xEF 0x8D 0xA2
+    s = '\"'
+    for b in bytes.split(' '):
+        bstr = b.split('0x')[1].lower()
+        s += f'\\x{bstr}'
+
+    return s + "\""
+
 oprint(f'// Generated Timestamp: {days[now.weekday()]}, {months[now.month]} {now.day} {now.year} [timestamp={int(now.timestamp())}]\n\n')
 
 for codepoint, glyph_name in cmap.items():
@@ -86,7 +97,7 @@ for codepoint, glyph_name in cmap.items():
     unicode = f'U+{codepoint:04X}'
     name = f'ICON_{found}' if Config.USE_CUSTOM_NAMES else str(glyph_name)
 
-    oprint(f'#define {name} {cp} // {unicode}\n')
+    oprint(f'#define {name} {get_c_style_str(cp)} // {unicode}\n')
     NAMES.append(name)
 
     if first is None:
@@ -99,9 +110,9 @@ for codepoint, glyph_name in cmap.items():
 
 oprint(f'\n\n')
 
-oprint(f'#define ICON_FA_MIN {first.replace('U+', '0x')}\n')
-oprint(f'#define ICON_FA_MAX {last.replace('U+', '0x')}')
+oprint(f'#define ICON_MIN_FA {first.replace('U+', '0x')}\n')
+oprint(f'#define ICON_MAX_FA {last.replace('U+', '0x')}')
 
 if Config.SAVE_HEADER:
     with open(Config.HEADER_NAME, 'w') as f:
-        f.write(f'#pragma once\n{OUT}\n\n{get_vector(NAMES)}')
+        f.write(f'{OUT}\n\n{get_vector(NAMES)}')
