@@ -12,7 +12,7 @@ from datetime import datetime as dt
 
 OUT = "#pragma once\n"
 if Config.CREATE_VECTOR:
-    OUT += f'#include <vector>\n\n'
+    OUT += f'#include <vector>\n#include <string>\n\n'
 NAMES = []
 
 def oprint(s):
