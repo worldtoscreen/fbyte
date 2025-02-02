@@ -115,4 +115,4 @@ oprint(f'#define ICON_MAX_FA {last.replace('U+', '0x')}')
 
 if Config.SAVE_HEADER:
     with open(Config.HEADER_NAME, 'w') as f:
-        f.write(f'{OUT}\n\n{get_vector(NAMES)}')
+        f.write(f'{OUT}\n\n{ f'{get_vector(NAMES)};' if Config.CREATE_VECTOR else '' }')
